@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace GradeBook
 {
@@ -12,7 +10,11 @@ namespace GradeBook
             book.AddGrade(89.9);
             book.AddGrade(91.9);
             book.AddGrade(79.9);
-            book.ShowStatistics();
+
+            var stats = book.GetStatistics();
+            Console.WriteLine($"The average grade is {stats.Average:N1}");
+            Console.WriteLine($"The hightest grade is {stats.High:N1}");
+            Console.WriteLine($"The lowest grade is {stats.Low:N1}");
         }
     }
 }

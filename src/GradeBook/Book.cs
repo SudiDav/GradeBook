@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace GradeBook
 {
-    class Book
+    public class Book
     {
         private List<double> grades;
         private string name;
@@ -17,21 +17,21 @@ namespace GradeBook
         {
             grades.Add(grade);
         }
-        public void ShowStatistics()
+        public Statistics GetStatistics()
         {
-            var result = 0.0;
-            var highGrage = double.MinValue;
-            var lowGrade = double.MaxValue;
-            foreach (var number in grades)
+            var result = new Statistics();
+            result.Average = 0.0;
+            result.High = double.MinValue;
+            result.Low = double.MaxValue;
+            foreach (var grade in grades)
             {
-                highGrage = Math.Max(number, highGrage);
-                lowGrade = Math.Min(number, lowGrade);
-                result += number;
+                result.High = Math.Max(grade, result.High);
+                result.Low = Math.Min(grade, result.Low);
+                result.Average += grade;
             }
-            result = grades.Average();
-            Console.WriteLine($"The average grade is {result:N2}");
-            Console.WriteLine($"The hightest grade is {highGrage:N2}");
-            Console.WriteLine($"The lowest grade is {lowGrade:N2}");
+            result.Average = grades.Average();
+
+            return result;
         }
     }
 }
