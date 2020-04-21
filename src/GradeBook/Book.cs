@@ -4,8 +4,10 @@ using System.Linq;
 
 namespace GradeBook
 {
+    public delegate void GradeAddedDelegate(object sender, EventArgs args);
     public class Book
     {
+        public event GradeAddedDelegate GradeAdded;
         private List<double> grades;
         public string Name { get; set; }
         public Book(string name)
@@ -39,6 +41,10 @@ namespace GradeBook
             if (grade >= 0 && grade <= 100)
             {
                 grades.Add(grade);
+                if (GradeAdded != null)
+                {
+                    GradeAdded(this, new EventArgs());
+                }
             }
             else
             {
