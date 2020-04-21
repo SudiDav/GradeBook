@@ -3,8 +3,35 @@ using Xunit;
 
 namespace GradeBook.Tests
 {
+    // access modifier, delegate keyword , return type then the name of the delegate
+    public delegate string WriteLogDelegate(string logMessage); // declaring a delegate
+    // delegates define how methods will look like.
     public class TypeTests
     {
+        int count = 0;
+        [Fact]
+        public void WriteLogDelegateReturnMessage()
+        {
+            //initiate the delegate
+            WriteLogDelegate logDelegate = ReturnMessage;
+
+            // assign delegate
+            logDelegate += ReturnMessage;
+            logDelegate += IncrementCount;
+
+            var result = logDelegate("Elsie");
+            Assert.Equal(3, count);
+        }
+        string IncrementCount(string message)
+        {
+            count++;
+            return message;
+        }
+        string ReturnMessage(string message)
+        {
+            count++;
+            return message;
+        }
         [Fact]
         public void IsPassByRef()
         {
