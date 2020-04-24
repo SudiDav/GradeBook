@@ -1,3 +1,4 @@
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,12 +6,77 @@ using System.Linq;
 namespace GradeBook
 {
     public delegate void GradeAddedDelegate(object sender, EventArgs args);
-    public class Book
+    public class NameObject
     {
-        public event GradeAddedDelegate GradeAdded;
-        private List<double> grades;
+        public NameObject(string name)
+        {
+            Name = name;
+        }
+
         public string Name { get; set; }
-        public Book(string name)
+    }
+    public interface IBook
+    {
+        void AddGrade(double grade);
+        Statistics GetStatistics();
+        string Name { get; }
+        event GradeAddedDelegate GradeAdded;
+    }
+    public abstract class Book : NameObject, IBook
+    {
+        public Book(string name) : base(name)
+        {
+        }
+
+        public abstract event GradeAddedDelegate GradeAdded;
+        public abstract void AddGrade(double grade);
+        public abstract Statistics GetStatistics();
+    }
+    public class DiskBook : Book
+    {
+        public DiskBook(string name) : base(name)
+        {
+        }
+
+        public override event GradeAddedDelegate GradeAdded;
+
+        public override void AddGrade(double grade)
+        {
+            using (var writer = File.AppendText($"{Name}.txt"))
+            {
+                writer.WriteLine(grade);
+                if (GradeAdded != null)
+                {
+                    GradeAdded(this, new EventArgs());
+                }
+            }
+
+        }
+
+        public override Statistics GetStatistics()
+        {
+            var result = new Statistics();
+
+            using (var reader = File.OpenText($"{Name}.txt"))
+            {
+                var line = reader.ReadLine();
+                while (line != null)
+                {
+                    var number = double.Parse(line);
+                    result.Add(number);
+                    line = reader.ReadLine();
+                }
+            }
+
+            return result;
+        }
+    }
+    public class InMemeryBook : Book
+    {
+
+        public override event GradeAddedDelegate GradeAdded;
+        private List<double> grades;
+        public InMemeryBook(string name) : base(name)
         {
             grades = new List<double>();
             Name = name;
@@ -36,7 +102,7 @@ namespace GradeBook
                     break;
             }
         }
-        public void AddGrade(double grade)
+        public override void AddGrade(double grade)
         {
             if (grade >= 0 && grade <= 100)
             {
@@ -51,18 +117,13 @@ namespace GradeBook
                 throw new ArgumentException($"Invalid {nameof(grade)}");
             }
         }
-        public Statistics GetStatistics()
+        public override Statistics GetStatistics()
         {
             var result = new Statistics();
-            result.Average = 0.0;
-            result.High = double.MinValue;
-            result.Low = double.MaxValue;
 
             foreach (var grade in grades)
             {
-                result.High = Math.Max(grade, result.High);
-                result.Low = Math.Min(grade, result.Low);
-                result.Average += grade;
+                result.Add(grade);
             }
             // var index = 0;
             // do
@@ -77,27 +138,8 @@ namespace GradeBook
             //     result.High = Math.Max(grades[index], result.High);
             //     result.Low = Math.Min(grades[index], result.Low);
             //     result.Average += grades[index];
-            // }
-            result.Average = grades.Average();
+            // }          
 
-            switch (result.Average)
-            {
-                case var d when d >= 90.0:
-                    result.letter = 'A';
-                    break;
-                case var d when d >= 80.0:
-                    result.letter = 'B';
-                    break;
-                case var d when d >= 70.0:
-                    result.letter = 'C';
-                    break;
-                case var d when d >= 60.0:
-                    result.letter = 'C';
-                    break;
-                default:
-                    result.letter = 'F';
-                    break;
-            }
 
             return result;
         }
